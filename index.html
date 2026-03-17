@@ -3,95 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบยืมหนังสือ - ห้อง 302</title>
+    <title>ระบบยืม-คืนหนังสือ</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --dark: #2c3e50;
+            --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --gray: #f8f9fa;
         }
-        body { font-family: 'Prompt', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        body { font-family: 'Prompt', sans-serif; background-color: var(--gray); margin: 0; padding: 20px; color: #2c3e50; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
-        /* Form Styling */
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 1rem; }
-        button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; font-family: inherit; }
+        /* Header */
+        header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
+        h1 { margin: 0; font-weight: 600; color: var(--primary); }
+
+        /* Form */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem; }
+        button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; font-family: inherit; }
         .btn-add { background: var(--success); color: white; width: 100%; margin-top: 15px; font-size: 1rem; }
-        .btn-add:hover { background: #27ae60; }
+        .btn-add:hover { background: #219150; }
 
-        /* Search & Filter Bar */
-        .tools-bar { display: flex; gap: 10px; background: #ebf3f9; border-top: 4px solid var(--primary); }
-        .search-input { flex: 2; }
-        .filter-select { flex: 1; }
+        /* Search */
+        .search-bar { background: #fff; border: 1px solid #ddd; display: flex; align-items: center; padding: 5px 15px; }
+        .search-input { border: none; flex: 1; outline: none; }
 
-        /* List Styling */
-        .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px; }
-        .book-item { background: white; padding: 20px; border-radius: 12px; border-left: 6px solid var(--primary); position: relative; transition: 0.2s; }
-        .book-item.overdue { border-left-color: var(--danger); background: #fff5f5; }
+        /* List */
+        .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .book-item { background: white; padding: 20px; border-radius: 10px; border: 1px solid #eee; border-top: 5px solid var(--primary); }
+        .book-item.overdue { border-top-color: var(--danger); background: #fff8f8; }
         
-        .status-badge { position: absolute; top: 15px; right: 15px; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; color: white; }
-        .bg-ok { background: var(--success); }
-        .bg-late { background: var(--danger); }
+        .meta-text { font-size: 0.8rem; color: #95a5a6; margin-bottom: 5px; }
+        .book-title { font-weight: 600; font-size: 1.15rem; margin-bottom: 5px; color: var(--primary); }
+        .user-info { color: #34495e; margin-bottom: 12px; font-size: 0.95rem; }
+        
+        /* Fine Display */
+        .fine-box { background: #fdf2f2; color: var(--danger); padding: 8px; border-radius: 4px; margin-bottom: 10px; font-weight: 600; text-align: center; font-size: 0.85rem; border: 1px solid #fbdada; }
 
-        .fine-box { background: #ffeaa7; color: #d63031; padding: 10px; border-radius: 8px; margin: 15px 0; font-weight: 600; text-align: center; border: 1px solid #fab1a0; }
-        .btn-return { background: #f1f2f6; color: var(--dark); width: 100%; margin-top: 10px; }
-        .btn-return:hover { background: #dfe4ea; }
-
-        h1, h3 { margin-top: 0; color: var(--dark); }
-        .meta-text { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 5px; }
+        .btn-return { background: #f1f2f6; color: #555; width: 100%; }
+        .btn-return:hover { background: #e2e4e7; color: var(--danger); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header style="text-align: center; margin-bottom: 30px;">
-        <h1>📚 ระบบยืม-คืนหนังสือ ห้อง 302</h1>
-        <p>กติกา: ยืมได้ 7 วัน | เกินกำหนดปรับวันละ 1 บาท</p>
+    <header>
+        <h1>ระบบยืม-คืนหนังสือ</h1>
     </header>
 
     <div class="card">
-        <h3>📝 บันทึกข้อมูลการยืม</h3>
         <div class="form-grid">
-            <input type="text" id="bName" placeholder="ชื่อหนังสือที่ยืม">
-            <input type="text" id="uName" placeholder="ชื่อ-นามสกุล ผู้ยืม">
-            <input type="text" id="uClass" placeholder="ระดับชั้น (ม.3/...)">
+            <input type="text" id="bName" placeholder="ชื่อหนังสือ">
+            <input type="text" id="uName" placeholder="ชื่อผู้ยืม">
+            <input type="text" id="uClass" placeholder="ระดับชั้น">
             <input type="number" id="uNo" placeholder="เลขที่">
         </div>
-        <button class="btn-add" onclick="saveData()">ยืนยันบันทึกข้อมูล</button>
+        <button class="btn-add" onclick="saveData()">บันทึกข้อมูลการยืม</button>
     </div>
 
-    <div class="card tools-bar">
-        <input type="text" id="q" class="search-input" onkeyup="render()" placeholder="🔍 พิมพ์เพื่อค้นหาชื่อหนังสือ หรือ ชื่อคนยืม...">
-        <select id="f" class="filter-select" onchange="render()">
-            <option value="all">แสดงทั้งหมด</option>
-            <option value="late">เฉพาะที่เกินกำหนด 🚨</option>
-        </select>
+    <div class="card search-bar">
+        <span>🔍</span>
+        <input type="text" id="q" class="search-input" onkeyup="render()" placeholder="ค้นหาจากชื่อหนังสือหรือชื่อผู้ยืม...">
     </div>
 
     <div id="result" class="list-grid"></div>
 </div>
 
 <script>
-    // 1. ฟังก์ชันโหลดและแสดงผล
     function render() {
-        const list = JSON.parse(localStorage.getItem('lib-302-data') || '[]');
+        const list = JSON.parse(localStorage.getItem('lib-v4-data') || '[]');
         const query = document.getElementById('q').value.toLowerCase();
-        const filter = document.getElementById('f').value;
         const container = document.getElementById('result');
         container.innerHTML = '';
 
-        // กรองข้อมูล
-        const filtered = list.filter(item => {
-            const isLate = new Date() > new Date(item.due);
-            const matchesSearch = item.book.toLowerCase().includes(query) || 
-                                  item.user.toLowerCase().includes(query);
-            
-            if (filter === 'late') return matchesSearch && isLate;
-            return matchesSearch;
-        });
+        const filtered = list.filter(item => 
+            item.book.toLowerCase().includes(query) || 
+            item.user.toLowerCase().includes(query)
+        );
 
-        // สร้าง Card แสดงผล
         filtered.forEach(item => {
             const today = new Date();
             const dueDate = new Date(item.due);
@@ -99,29 +88,30 @@
             const lateDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             const isLate = diffTime > 0;
 
+            let fineHtml = "";
+            let itemClass = "book-item";
+
+            if (isLate) {
+                fineHtml = `<div class="fine-box">ค่าปรับเกินกำหนด: ${lateDays} บาท</div>`;
+                itemClass += " overdue";
+            }
+
             container.innerHTML += `
-                <div class="book-item ${isLate ? 'overdue' : ''}">
-                    <span class="status-badge ${isLate ? 'bg-late' : 'bg-ok'}">
-                        ${isLate ? 'เกินกำหนด' : 'ปกติ'}
-                    </span>
+                <div class="${itemClass}">
                     <div class="meta-text">ชั้น: ${item.class} | เลขที่: ${item.no}</div>
-                    <div style="font-weight: 600; font-size: 1.2rem; margin-bottom: 5px;">📖 ${item.book}</div>
-                    <div style="color: #2f3542;">👤 ผู้ยืม: ${item.user}</div>
-                    <div style="font-size: 0.9rem; margin-top: 10px; color: #57606f;">
-                        📅 กำหนดคืน: ${dueDate.toLocaleDateString('th-TH')}
-                    </div>
-                    ${isLate ? `<div class="fine-box">🚨 ค่าปรับ: ${lateDays} บาท (เกินมา ${lateDays} วัน)</div>` : ''}
-                    <button class="btn-return" onclick="removeData(${item.id})">คืนหนังสือเรียบร้อย</button>
+                    <div class="book-title">${item.book}</div>
+                    <div class="user-info">ผู้ยืม: ${item.user}</div>
+                    ${fineHtml}
+                    <button class="btn-return" onclick="removeData(${item.id})">คืนหนังสือ</button>
                 </div>
             `;
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #a4b0be;">ไม่พบรายการยืมหนังสือ</p>';
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #bdc3c7;">ไม่มีรายการข้อมูล</p>';
         }
     }
 
-    // 2. ฟังก์ชันบันทึกข้อมูล
     function saveData() {
         const book = document.getElementById('bName').value;
         const user = document.getElementById('uName').value;
@@ -129,12 +119,12 @@
         const no = document.getElementById('uNo').value;
 
         if(!book || !user || !cls || !no) {
-            alert("กรุณากรอกข้อมูลให้ครบทุกช่องนะครับ");
+            alert("กรุณากรอกข้อมูลให้ครบทุกช่อง");
             return;
         }
 
         const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 7); // บวกเพิ่ม 7 วัน
+        dueDate.setDate(dueDate.getDate() + 7); // กำหนดคืน 7 วัน
 
         const newData = {
             id: Date.now(),
@@ -145,11 +135,10 @@
             due: dueDate.toISOString()
         };
 
-        let list = JSON.parse(localStorage.getItem('lib-302-data') || '[]');
+        let list = JSON.parse(localStorage.getItem('lib-v4-data') || '[]');
         list.push(newData);
-        localStorage.setItem('lib-302-data', JSON.stringify(list));
+        localStorage.setItem('lib-v4-data', JSON.stringify(list));
 
-        // ล้างค่าในช่องกรอก
         document.getElementById('bName').value = '';
         document.getElementById('uName').value = '';
         document.getElementById('uClass').value = '';
@@ -158,12 +147,11 @@
         render();
     }
 
-    // 3. ฟังก์ชันลบข้อมูล (คืนหนังสือ)
     function removeData(id) {
-        if(confirm("ยืนยันว่าคืนหนังสือแล้วและชำระค่าปรับเรียบร้อย?")) {
-            let list = JSON.parse(localStorage.getItem('lib-302-data') || '[]');
+        if(confirm("ยืนยันการคืนหนังสือ?")) {
+            let list = JSON.parse(localStorage.getItem('lib-v4-data') || '[]');
             list = list.filter(item => item.id !== id);
-            localStorage.setItem('lib-302-data', JSON.stringify(list));
+            localStorage.setItem('lib-v4-data', JSON.stringify(list));
             render();
         }
     }
