@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --gray: #f8f9fa;
+            --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --line: #06c755; --gray: #f8f9fa;
         }
         body { font-family: 'Prompt', sans-serif; background-color: var(--gray); margin: 0; padding: 20px; color: #2c3e50; }
         .container { max-width: 900px; margin: 0 auto; }
@@ -16,7 +16,6 @@
         header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
         h1 { margin: 0; font-weight: 600; color: var(--primary); }
 
-        /* ปรับปรุง Form Grid ให้รองรับช่องเบอร์โทร */
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
         input, .filter-select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem; }
         button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; font-family: inherit; }
@@ -40,8 +39,11 @@
         .date-box { background: #f1f2f6; padding: 8px; border-radius: 6px; margin: 10px 0; font-size: 0.85rem; text-align: center; }
         .fine-box { background: #fdf2f2; color: var(--danger); padding: 10px; border-radius: 6px; margin-bottom: 10px; font-weight: 600; text-align: center; border: 1px solid #fbdada; }
 
-        .btn-return { background: #2c3e50; color: white; width: 100%; margin-top: 5px; }
-        .btn-return:hover { background: #e74c3c; }
+        /* ปุ่มต่างๆ */
+        .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .btn-return { background: #2c3e50; color: white; }
+        .btn-line { background: var(--line); color: white; text-decoration: none; text-align: center; padding: 10px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; }
+        .btn-line:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -79,7 +81,7 @@
 
 <script>
     function render() {
-        const list = JSON.parse(localStorage.getItem('lib-phone-data') || '[]');
+        const list = JSON.parse(localStorage.getItem('lib-line-data') || '[]');
         const query = document.getElementById('q').value.toLowerCase();
         const filter = document.getElementById('statusFilter').value;
         const container = document.getElementById('result');
@@ -91,7 +93,6 @@
             const diffTime = today.setHours(0,0,0,0) - dueDate.setHours(0,0,0,0);
             const isLate = diffTime > 0;
 
-            // ค้นหาครอบคลุมถึงชื่อหนังสือ, ชื่อผู้ยืม และเบอร์โทร
             const matchesSearch = item.book.toLowerCase().includes(query) || 
                                   item.user.toLowerCase().includes(query) ||
                                   (item.phone && item.phone.includes(query));
@@ -111,43 +112,38 @@
             const isLate = lateDays > 0;
 
             let fineHtml = "";
+            let lineBtnHtml = "";
             let itemClass = "book-item";
 
             if (isLate) {
                 fineHtml = `<div class="fine-box">🚨 เกินกำหนด ${lateDays} วัน<br>ค่าปรับ: ${lateDays} บาท</div>`;
                 itemClass += " overdue";
+                
+                // ข้อความสำหรับส่ง Line
+                const msg = encodeURIComponent(`สวัสดีครับคุณ ${item.user} ขออนุญาตตามคืนหนังสือ "${item.book}" เนื่องจากเกินกำหนดมา ${lateDays} วันแล้ว (ค่าปรับ ${lateDays} บาท) รบกวนนำมาคืนด้วยนะครับ ขอบคุณครับ`);
+                lineBtnHtml = `<a href="https://line.me/R/msg/text/?${msg}" class="btn-line" target="_blank">💬 ตามคืนผ่าน LINE</a>`;
             }
 
             container.innerHTML += `
                 <div class="${itemClass}">
                     <div class="book-title">📖 ${item.book}</div>
-                    <div class="info-row">
-                        <span class="label">ผู้ยืม:</span>
-                        <span><b>${item.user}</b></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">ชั้น/เลขที่:</span>
-                        <span>${item.class} / เลขที่ ${item.no}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="label">เบอร์โทร:</span>
-                        <span><a href="tel:${item.phone}" class="tel-link">${item.phone || '-'}</a></span>
-                    </div>
+                    <div class="info-row"><span class="label">ผู้ยืม:</span><span><b>${item.user}</b></span></div>
+                    <div class="info-row"><span class="label">ชั้น/เลขที่:</span><span>${item.class} / ${item.no}</span></div>
+                    <div class="info-row"><span class="label">เบอร์โทร:</span><span><a href="tel:${item.phone}" class="tel-link">${item.phone || '-'}</a></span></div>
                     
-                    <div class="date-box">
-                        📅 วันที่ต้องคืน: <b>${new Date(item.due).toLocaleDateString('th-TH')}</b>
-                    </div>
+                    <div class="date-box">📅 กำหนดคืน: <b>${new Date(item.due).toLocaleDateString('th-TH')}</b></div>
 
                     ${fineHtml}
                     
-                    <button class="btn-return" onclick="removeData(${item.id})">คืนหนังสือ</button>
+                    <div class="btn-group">
+                        ${lineBtnHtml}
+                        <button class="btn-return" onclick="removeData(${item.id})">คืนหนังสือเรียบร้อย</button>
+                    </div>
                 </div>
             `;
         });
 
-        if (filtered.length === 0) {
-            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #bdc3c7;">ไม่พบรายการข้อมูล</p>';
-        }
+        if (filtered.length === 0) container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #bdc3c7;">ไม่พบข้อมูล</p>';
     }
 
     function saveData() {
@@ -157,47 +153,26 @@
         const no = document.getElementById('uNo').value;
         const phone = document.getElementById('uPhone').value;
 
-        if(!book || !user || !cls || !no || !phone) {
-            alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (รวมเบอร์โทรด้วยนะครับ)");
-            return;
-        }
+        if(!book || !user || !cls || !no || !phone) return alert("กรุณากรอกข้อมูลให้ครบถ้วนนะครับ");
 
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 7);
 
-        const newData = {
-            id: Date.now(),
-            book: book,
-            user: user,
-            class: cls,
-            no: no,
-            phone: phone,
-            due: dueDate.toISOString()
-        };
+        const list = JSON.parse(localStorage.getItem('lib-line-data') || '[]');
+        list.push({ id: Date.now(), book, user, class: cls, no, phone, due: dueDate.toISOString() });
+        localStorage.setItem('lib-line-data', JSON.stringify(list));
 
-        let list = JSON.parse(localStorage.getItem('lib-phone-data') || '[]');
-        list.push(newData);
-        localStorage.setItem('lib-phone-data', JSON.stringify(list));
-
-        // ล้างค่าช่องกรอกข้อมูล
-        document.getElementById('bName').value = '';
-        document.getElementById('uName').value = '';
-        document.getElementById('uClass').value = '';
-        document.getElementById('uNo').value = '';
-        document.getElementById('uPhone').value = '';
-
+        ['bName', 'uName', 'uClass', 'uNo', 'uPhone'].forEach(id => document.getElementById(id).value = '');
         render();
     }
 
     function removeData(id) {
         if(confirm("ยืนยันการคืนหนังสือ?")) {
-            let list = JSON.parse(localStorage.getItem('lib-phone-data') || '[]');
-            list = list.filter(item => item.id !== id);
-            localStorage.setItem('lib-phone-data', JSON.stringify(list));
+            const list = JSON.parse(localStorage.getItem('lib-line-data') || '[]');
+            localStorage.setItem('lib-line-data', JSON.stringify(list.filter(i => i.id !== id)));
             render();
         }
     }
-
     window.onload = render;
 </script>
 
