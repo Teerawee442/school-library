@@ -1,0 +1,131 @@
+<div class="html!"></div><!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library System - Room 302</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3498db; --success: #2ecc71; --danger: #e74c3c; --dark: #2c3e50;
+        }
+        body { font-family: 'Prompt', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        /* Form Styling */
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
+        button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.3s; font-family: inherit; }
+        .btn-add { background: var(--success); color: white; width: 100%; margin-top: 10px; }
+        
+        /* Search Bar */
+        .search-bar { display: flex; gap: 10px; background: #ebf3f9; }
+        .search-bar input { flex: 2; }
+        
+        /* Book Cards */
+        .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .book-item { background: white; padding: 15px; border-radius: 10px; border-left: 6px solid var(--primary); position: relative; }
+        .book-item.overdue { border-left-color: var(--danger); background: #fff5f5; }
+        
+        .badge { position: absolute; top: 10px; right: 10px; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; color: white; }
+        .badge-ok { background: var(--success); }
+        .badge-late { background: var(--danger); }
+
+        .fine-box { background: #ffeaa7; color: #d63031; padding: 8px; border-radius: 6px; margin: 10px 0; font-weight: 600; text-align: center; border: 1px solid #fab1a0; }
+        .btn-del { background: #eee; color: #666; width: 100%; }
+        .btn-del:hover { background: #ddd; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📚 ระบบยืมหนังสือ ห้อง 302</h2>
+    
+    <div class="card">
+        <div class="form-grid">
+            <input type="text" id="bName" placeholder="ชื่อหนังสือ">
+            <input type="text" id="uName" placeholder="ชื่อคนยืม">
+            <input type="text" id="uClass" placeholder="ระดับชั้น">
+            <input type="number" id="uNo" placeholder="เลขที่">
+        </div>
+        <button class="btn-add" onclick="saveData()">ยืนยันการยืม (7 วัน)</button>
+    </div>
+
+    <div class="card search-bar">
+        <input type="text" id="q" onkeyup="render()" placeholder="🔍 ค้นหาชื่อหนังสือ หรือ ชื่อคนยืม...">
+        <select id="f" onchange="render()">
+            <option value="all">ทั้งหมด</option>
+            <option value="late">เกินกำหนด</option>
+        </select>
+    </div>
+
+    <div id="result" class="list-grid"></div>
+</div>
+
+<script>
+    // ฟังก์ชันบันทึก
+    function saveData() {
+        const data = {
+            id: Date.now(),
+            book: document.getElementById('bName').value,
+            user: document.getElementById('uName').value,
+            class: document.getElementById('uClass').value,
+            no: document.getElementById('uNo').value,
+            due: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // อีก 7 วัน
+        };
+
+        if(!data.book || !data.user) return alert("กรอกข้อมูลไม่ครบ!");
+
+        let list = JSON.parse(localStorage.getItem('lib-data') || '[]');
+        list.push(data);
+        localStorage.setItem('lib-data', JSON.stringify(list));
+        
+        // ล้างค่า
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        render();
+    }
+
+    // ฟังก์ชันแสดงผล
+    function render() {
+        const list = JSON.parse(localStorage.getItem('lib-data') || '[]');
+        const q = document.getElementById('q').value.toLowerCase();
+        const f = document.getElementById('f').value;
+        const container = document.getElementById('result');
+        container.innerHTML = '';
+
+        list.filter(item => {
+            const isLate = new Date() > new Date(item.due);
+            const match = item.book.toLowerCase().includes(q) || item.user.toLowerCase().includes(q);
+            return f === 'late' ? (match && isLate) : match;
+        }).forEach(item => {
+            const due = new Date(item.due);
+            const lateDays = Math.ceil((new Date() - due) / (1000 * 60 * 60 * 24));
+            const isLate = lateDays > 0;
+
+            container.innerHTML += `
+                <div class="book-item ${isLate ? 'overdue' : ''}">
+                    <span class="badge ${isLate ? 'badge-late' : 'badge-ok'}">${isLate ? 'เกินกำหนด' : 'ปกติ'}</span>
+                    <div style="font-size: 0.8rem; color: #888">ชั้น ${item.class} เลขที่ ${item.no}</div>
+                    <div style="font-weight: 600; font-size: 1.1rem">📖 ${item.book}</div>
+                    <div style="margin-bottom: 10px">👤 ${item.user}</div>
+                    <div style="font-size: 0.85rem">📅 กำหนดคืน: ${due.toLocaleDateString('th-TH')}</div>
+                    ${isLate ? `<div class="fine-box">🚨 ค่าปรับ: ${lateDays} บาท</div>` : ''}
+                    <button class="btn-del" onclick="removeData(${item.id})">คืนหนังสือ</button>
+                </div>
+            `;
+        });
+    }
+
+    function removeData(id) {
+        if(!confirm("ยืนยันการคืน?")) return;
+        let list = JSON.parse(localStorage.getItem('lib-data') || '[]');
+        localStorage.setItem('lib-data', JSON.stringify(list.filter(i => i.id !== id)));
+        render();
+    }
+
+    window.onload = render;
+</script>
+
+</body>
+</html>
