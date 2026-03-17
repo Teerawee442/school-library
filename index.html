@@ -16,14 +16,17 @@
         header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
         h1 { margin: 0; font-weight: 600; color: var(--primary); }
 
+        /* ปรับปรุง Form Grid ให้รองรับช่องเบอร์โทร */
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-        input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem; }
+        input, .filter-select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem; }
         button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; font-family: inherit; }
         .btn-add { background: var(--success); color: white; width: 100%; margin-top: 15px; font-size: 1rem; }
         .btn-add:hover { background: #219150; }
 
-        .search-bar { background: #fff; border: 1px solid #ddd; display: flex; align-items: center; padding: 5px 15px; }
-        .search-input { border: none; flex: 1; outline: none; padding: 10px; font-family: inherit; }
+        .tools-bar { display: flex; gap: 10px; flex-wrap: wrap; }
+        .search-container { flex: 2; display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; background: white; min-width: 250px; }
+        .search-input { border: none; flex: 1; outline: none; padding: 12px; font-family: inherit; }
+        .filter-select { flex: 1; min-width: 150px; cursor: pointer; }
 
         .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .book-item { background: white; padding: 20px; border-radius: 10px; border: 1px solid #eee; border-top: 5px solid var(--primary); position: relative; }
@@ -32,6 +35,7 @@
         .book-title { font-weight: 600; font-size: 1.2rem; margin-bottom: 8px; color: var(--primary); }
         .info-row { font-size: 0.95rem; margin-bottom: 5px; display: flex; justify-content: space-between; }
         .label { color: #7f8c8d; }
+        .tel-link { color: var(--success); text-decoration: none; font-weight: 600; }
         
         .date-box { background: #f1f2f6; padding: 8px; border-radius: 6px; margin: 10px 0; font-size: 0.85rem; text-align: center; }
         .fine-box { background: #fdf2f2; color: var(--danger); padding: 10px; border-radius: 6px; margin-bottom: 10px; font-weight: 600; text-align: center; border: 1px solid #fbdada; }
@@ -53,13 +57,21 @@
             <input type="text" id="uName" placeholder="ชื่อผู้ยืม">
             <input type="text" id="uClass" placeholder="ระดับชั้น">
             <input type="number" id="uNo" placeholder="เลขที่">
+            <input type="tel" id="uPhone" placeholder="เบอร์โทรศัพท์">
         </div>
         <button class="btn-add" onclick="saveData()">บันทึกข้อมูลการยืม</button>
     </div>
 
-    <div class="card search-bar">
-        <span>🔍</span>
-        <input type="text" id="q" class="search-input" onkeyup="render()" placeholder="ค้นหาชื่อหนังสือ หรือ ชื่อผู้ยืม...">
+    <div class="tools-bar card" style="padding: 15px;">
+        <div class="search-container">
+            <span>🔍</span>
+            <input type="text" id="q" class="search-input" onkeyup="render()" placeholder="ค้นหาชื่อหนังสือ, ผู้ยืม หรือเบอร์โทร...">
+        </div>
+        <select id="statusFilter" class="filter-select" onchange="render()">
+            <option value="all">แสดงทั้งหมด</option>
+            <option value="normal">ปกติ ✅</option>
+            <option value="late">เกินกำหนด 🚨</option>
+        </select>
     </div>
 
     <div id="result" class="list-grid"></div>
@@ -67,21 +79,33 @@
 
 <script>
     function render() {
-        const list = JSON.parse(localStorage.getItem('lib-final-data') || '[]');
+        const list = JSON.parse(localStorage.getItem('lib-phone-data') || '[]');
         const query = document.getElementById('q').value.toLowerCase();
+        const filter = document.getElementById('statusFilter').value;
         const container = document.getElementById('result');
         container.innerHTML = '';
 
-        const filtered = list.filter(item => 
-            item.book.toLowerCase().includes(query) || 
-            item.user.toLowerCase().includes(query)
-        );
+        const filtered = list.filter(item => {
+            const today = new Date();
+            const dueDate = new Date(item.due);
+            const diffTime = today.setHours(0,0,0,0) - dueDate.setHours(0,0,0,0);
+            const isLate = diffTime > 0;
+
+            // ค้นหาครอบคลุมถึงชื่อหนังสือ, ชื่อผู้ยืม และเบอร์โทร
+            const matchesSearch = item.book.toLowerCase().includes(query) || 
+                                  item.user.toLowerCase().includes(query) ||
+                                  (item.phone && item.phone.includes(query));
+            
+            let matchesFilter = true;
+            if (filter === 'normal') matchesFilter = !isLate;
+            if (filter === 'late') matchesFilter = isLate;
+
+            return matchesSearch && matchesFilter;
+        });
 
         filtered.forEach(item => {
             const today = new Date();
             const dueDate = new Date(item.due);
-            
-            // คำนวณส่วนต่างวัน
             const diffTime = today.setHours(0,0,0,0) - dueDate.setHours(0,0,0,0);
             const lateDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             const isLate = lateDays > 0;
@@ -105,6 +129,10 @@
                         <span class="label">ชั้น/เลขที่:</span>
                         <span>${item.class} / เลขที่ ${item.no}</span>
                     </div>
+                    <div class="info-row">
+                        <span class="label">เบอร์โทร:</span>
+                        <span><a href="tel:${item.phone}" class="tel-link">${item.phone || '-'}</a></span>
+                    </div>
                     
                     <div class="date-box">
                         📅 วันที่ต้องคืน: <b>${new Date(item.due).toLocaleDateString('th-TH')}</b>
@@ -118,7 +146,7 @@
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #bdc3c7;">ไม่พบข้อมูลรายการยืม</p>';
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #bdc3c7;">ไม่พบรายการข้อมูล</p>';
         }
     }
 
@@ -127,14 +155,15 @@
         const user = document.getElementById('uName').value;
         const cls = document.getElementById('uClass').value;
         const no = document.getElementById('uNo').value;
+        const phone = document.getElementById('uPhone').value;
 
-        if(!book || !user || !cls || !no) {
-            alert("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+        if(!book || !user || !cls || !no || !phone) {
+            alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (รวมเบอร์โทรด้วยนะครับ)");
             return;
         }
 
         const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 7); // ยืมได้ 7 วัน
+        dueDate.setDate(dueDate.getDate() + 7);
 
         const newData = {
             id: Date.now(),
@@ -142,27 +171,29 @@
             user: user,
             class: cls,
             no: no,
+            phone: phone,
             due: dueDate.toISOString()
         };
 
-        let list = JSON.parse(localStorage.getItem('lib-final-data') || '[]');
+        let list = JSON.parse(localStorage.getItem('lib-phone-data') || '[]');
         list.push(newData);
-        localStorage.setItem('lib-final-data', JSON.stringify(list));
+        localStorage.setItem('lib-phone-data', JSON.stringify(list));
 
-        // ล้างค่า
+        // ล้างค่าช่องกรอกข้อมูล
         document.getElementById('bName').value = '';
         document.getElementById('uName').value = '';
         document.getElementById('uClass').value = '';
         document.getElementById('uNo').value = '';
+        document.getElementById('uPhone').value = '';
 
         render();
     }
 
     function removeData(id) {
-        if(confirm("ยืนยันการคืนหนังสือและชำระค่าปรับ (ถ้ามี)?")) {
-            let list = JSON.parse(localStorage.getItem('lib-final-data') || '[]');
+        if(confirm("ยืนยันการคืนหนังสือ?")) {
+            let list = JSON.parse(localStorage.getItem('lib-phone-data') || '[]');
             list = list.filter(item => item.id !== id);
-            localStorage.setItem('lib-final-data', JSON.stringify(list));
+            localStorage.setItem('lib-phone-data', JSON.stringify(list));
             render();
         }
     }
