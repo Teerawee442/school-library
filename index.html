@@ -1,9 +1,9 @@
-<div class="html!"></div><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Library System - Room 302</title>
+    <title>ระบบยืมหนังสือ - ห้อง 302</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,52 +11,61 @@
         }
         body { font-family: 'Prompt', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
         /* Form Styling */
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
-        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
-        button { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.3s; font-family: inherit; }
-        .btn-add { background: var(--success); color: white; width: 100%; margin-top: 10px; }
-        
-        /* Search Bar */
-        .search-bar { display: flex; gap: 10px; background: #ebf3f9; }
-        .search-bar input { flex: 2; }
-        
-        /* Book Cards */
-        .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .book-item { background: white; padding: 15px; border-radius: 10px; border-left: 6px solid var(--primary); position: relative; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 1rem; }
+        button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; font-family: inherit; }
+        .btn-add { background: var(--success); color: white; width: 100%; margin-top: 15px; font-size: 1rem; }
+        .btn-add:hover { background: #27ae60; }
+
+        /* Search & Filter Bar */
+        .tools-bar { display: flex; gap: 10px; background: #ebf3f9; border-top: 4px solid var(--primary); }
+        .search-input { flex: 2; }
+        .filter-select { flex: 1; }
+
+        /* List Styling */
+        .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 20px; }
+        .book-item { background: white; padding: 20px; border-radius: 12px; border-left: 6px solid var(--primary); position: relative; transition: 0.2s; }
         .book-item.overdue { border-left-color: var(--danger); background: #fff5f5; }
         
-        .badge { position: absolute; top: 10px; right: 10px; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; color: white; }
-        .badge-ok { background: var(--success); }
-        .badge-late { background: var(--danger); }
+        .status-badge { position: absolute; top: 15px; right: 15px; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; color: white; }
+        .bg-ok { background: var(--success); }
+        .bg-late { background: var(--danger); }
 
-        .fine-box { background: #ffeaa7; color: #d63031; padding: 8px; border-radius: 6px; margin: 10px 0; font-weight: 600; text-align: center; border: 1px solid #fab1a0; }
-        .btn-del { background: #eee; color: #666; width: 100%; }
-        .btn-del:hover { background: #ddd; }
+        .fine-box { background: #ffeaa7; color: #d63031; padding: 10px; border-radius: 8px; margin: 15px 0; font-weight: 600; text-align: center; border: 1px solid #fab1a0; }
+        .btn-return { background: #f1f2f6; color: var(--dark); width: 100%; margin-top: 10px; }
+        .btn-return:hover { background: #dfe4ea; }
+
+        h1, h3 { margin-top: 0; color: var(--dark); }
+        .meta-text { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📚 ระบบยืมหนังสือ ห้อง 302</h2>
-    
+    <header style="text-align: center; margin-bottom: 30px;">
+        <h1>📚 ระบบยืม-คืนหนังสือ ห้อง 302</h1>
+        <p>กติกา: ยืมได้ 7 วัน | เกินกำหนดปรับวันละ 1 บาท</p>
+    </header>
+
     <div class="card">
+        <h3>📝 บันทึกข้อมูลการยืม</h3>
         <div class="form-grid">
-            <input type="text" id="bName" placeholder="ชื่อหนังสือ">
-            <input type="text" id="uName" placeholder="ชื่อคนยืม">
-            <input type="text" id="uClass" placeholder="ระดับชั้น">
+            <input type="text" id="bName" placeholder="ชื่อหนังสือที่ยืม">
+            <input type="text" id="uName" placeholder="ชื่อ-นามสกุล ผู้ยืม">
+            <input type="text" id="uClass" placeholder="ระดับชั้น (ม.3/...)">
             <input type="number" id="uNo" placeholder="เลขที่">
         </div>
-        <button class="btn-add" onclick="saveData()">ยืนยันการยืม (7 วัน)</button>
+        <button class="btn-add" onclick="saveData()">ยืนยันบันทึกข้อมูล</button>
     </div>
 
-    <div class="card search-bar">
-        <input type="text" id="q" onkeyup="render()" placeholder="🔍 ค้นหาชื่อหนังสือ หรือ ชื่อคนยืม...">
-        <select id="f" onchange="render()">
-            <option value="all">ทั้งหมด</option>
-            <option value="late">เกินกำหนด</option>
+    <div class="card tools-bar">
+        <input type="text" id="q" class="search-input" onkeyup="render()" placeholder="🔍 พิมพ์เพื่อค้นหาชื่อหนังสือ หรือ ชื่อคนยืม...">
+        <select id="f" class="filter-select" onchange="render()">
+            <option value="all">แสดงทั้งหมด</option>
+            <option value="late">เฉพาะที่เกินกำหนด 🚨</option>
         </select>
     </div>
 
@@ -64,64 +73,99 @@
 </div>
 
 <script>
-    // ฟังก์ชันบันทึก
-    function saveData() {
-        const data = {
-            id: Date.now(),
-            book: document.getElementById('bName').value,
-            user: document.getElementById('uName').value,
-            class: document.getElementById('uClass').value,
-            no: document.getElementById('uNo').value,
-            due: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // อีก 7 วัน
-        };
-
-        if(!data.book || !data.user) return alert("กรอกข้อมูลไม่ครบ!");
-
-        let list = JSON.parse(localStorage.getItem('lib-data') || '[]');
-        list.push(data);
-        localStorage.setItem('lib-data', JSON.stringify(list));
-        
-        // ล้างค่า
-        document.querySelectorAll('input').forEach(i => i.value = '');
-        render();
-    }
-
-    // ฟังก์ชันแสดงผล
+    // 1. ฟังก์ชันโหลดและแสดงผล
     function render() {
-        const list = JSON.parse(localStorage.getItem('lib-data') || '[]');
-        const q = document.getElementById('q').value.toLowerCase();
-        const f = document.getElementById('f').value;
+        const list = JSON.parse(localStorage.getItem('lib-302-data') || '[]');
+        const query = document.getElementById('q').value.toLowerCase();
+        const filter = document.getElementById('f').value;
         const container = document.getElementById('result');
         container.innerHTML = '';
 
-        list.filter(item => {
+        // กรองข้อมูล
+        const filtered = list.filter(item => {
             const isLate = new Date() > new Date(item.due);
-            const match = item.book.toLowerCase().includes(q) || item.user.toLowerCase().includes(q);
-            return f === 'late' ? (match && isLate) : match;
-        }).forEach(item => {
-            const due = new Date(item.due);
-            const lateDays = Math.ceil((new Date() - due) / (1000 * 60 * 60 * 24));
-            const isLate = lateDays > 0;
+            const matchesSearch = item.book.toLowerCase().includes(query) || 
+                                  item.user.toLowerCase().includes(query);
+            
+            if (filter === 'late') return matchesSearch && isLate;
+            return matchesSearch;
+        });
+
+        // สร้าง Card แสดงผล
+        filtered.forEach(item => {
+            const today = new Date();
+            const dueDate = new Date(item.due);
+            const diffTime = today - dueDate;
+            const lateDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const isLate = diffTime > 0;
 
             container.innerHTML += `
                 <div class="book-item ${isLate ? 'overdue' : ''}">
-                    <span class="badge ${isLate ? 'badge-late' : 'badge-ok'}">${isLate ? 'เกินกำหนด' : 'ปกติ'}</span>
-                    <div style="font-size: 0.8rem; color: #888">ชั้น ${item.class} เลขที่ ${item.no}</div>
-                    <div style="font-weight: 600; font-size: 1.1rem">📖 ${item.book}</div>
-                    <div style="margin-bottom: 10px">👤 ${item.user}</div>
-                    <div style="font-size: 0.85rem">📅 กำหนดคืน: ${due.toLocaleDateString('th-TH')}</div>
-                    ${isLate ? `<div class="fine-box">🚨 ค่าปรับ: ${lateDays} บาท</div>` : ''}
-                    <button class="btn-del" onclick="removeData(${item.id})">คืนหนังสือ</button>
+                    <span class="status-badge ${isLate ? 'bg-late' : 'bg-ok'}">
+                        ${isLate ? 'เกินกำหนด' : 'ปกติ'}
+                    </span>
+                    <div class="meta-text">ชั้น: ${item.class} | เลขที่: ${item.no}</div>
+                    <div style="font-weight: 600; font-size: 1.2rem; margin-bottom: 5px;">📖 ${item.book}</div>
+                    <div style="color: #2f3542;">👤 ผู้ยืม: ${item.user}</div>
+                    <div style="font-size: 0.9rem; margin-top: 10px; color: #57606f;">
+                        📅 กำหนดคืน: ${dueDate.toLocaleDateString('th-TH')}
+                    </div>
+                    ${isLate ? `<div class="fine-box">🚨 ค่าปรับ: ${lateDays} บาท (เกินมา ${lateDays} วัน)</div>` : ''}
+                    <button class="btn-return" onclick="removeData(${item.id})">คืนหนังสือเรียบร้อย</button>
                 </div>
             `;
         });
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #a4b0be;">ไม่พบรายการยืมหนังสือ</p>';
+        }
     }
 
-    function removeData(id) {
-        if(!confirm("ยืนยันการคืน?")) return;
-        let list = JSON.parse(localStorage.getItem('lib-data') || '[]');
-        localStorage.setItem('lib-data', JSON.stringify(list.filter(i => i.id !== id)));
+    // 2. ฟังก์ชันบันทึกข้อมูล
+    function saveData() {
+        const book = document.getElementById('bName').value;
+        const user = document.getElementById('uName').value;
+        const cls = document.getElementById('uClass').value;
+        const no = document.getElementById('uNo').value;
+
+        if(!book || !user || !cls || !no) {
+            alert("กรุณากรอกข้อมูลให้ครบทุกช่องนะครับ");
+            return;
+        }
+
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 7); // บวกเพิ่ม 7 วัน
+
+        const newData = {
+            id: Date.now(),
+            book: book,
+            user: user,
+            class: cls,
+            no: no,
+            due: dueDate.toISOString()
+        };
+
+        let list = JSON.parse(localStorage.getItem('lib-302-data') || '[]');
+        list.push(newData);
+        localStorage.setItem('lib-302-data', JSON.stringify(list));
+
+        // ล้างค่าในช่องกรอก
+        document.getElementById('bName').value = '';
+        document.getElementById('uName').value = '';
+        document.getElementById('uClass').value = '';
+        document.getElementById('uNo').value = '';
+
         render();
+    }
+
+    // 3. ฟังก์ชันลบข้อมูล (คืนหนังสือ)
+    function removeData(id) {
+        if(confirm("ยืนยันว่าคืนหนังสือแล้วและชำระค่าปรับเรียบร้อย?")) {
+            let list = JSON.parse(localStorage.getItem('lib-302-data') || '[]');
+            list = list.filter(item => item.id !== id);
+            localStorage.setItem('lib-302-data', JSON.stringify(list));
+            render();
+        }
     }
 
     window.onload = render;
