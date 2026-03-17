@@ -3,178 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบยืม-คืนหนังสือ</title>
+    <title>ระบบยืม-คืนหนังสือ Online</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --line: #06c755; --gray: #f8f9fa;
-        }
-        body { font-family: 'Prompt', sans-serif; background-color: var(--gray); margin: 0; padding: 20px; color: #2c3e50; }
+        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --line: #06c755; --gray: #f8f9fa; }
+        body { font-family: 'Prompt', sans-serif; background-color: var(--gray); margin: 0; padding: 20px; }
         .container { max-width: 900px; margin: 0 auto; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        
-        header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
-        h1 { margin: 0; font-weight: 600; color: var(--primary); }
-
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-        input, .filter-select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem; }
-        button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; font-family: inherit; }
-        .btn-add { background: var(--success); color: white; width: 100%; margin-top: 15px; font-size: 1rem; }
-        .btn-add:hover { background: #219150; }
-
-        .tools-bar { display: flex; gap: 10px; flex-wrap: wrap; }
-        .search-container { flex: 2; display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; padding: 0 15px; background: white; min-width: 250px; }
-        .search-input { border: none; flex: 1; outline: none; padding: 12px; font-family: inherit; }
-        .filter-select { flex: 1; min-width: 150px; cursor: pointer; }
-
+        header { text-align: center; margin-bottom: 30px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        input, select { padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; }
+        button { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit; }
+        .btn-add { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+        .loading { text-align: center; color: var(--primary); font-weight: 600; padding: 20px; }
         .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .book-item { background: white; padding: 20px; border-radius: 10px; border: 1px solid #eee; border-top: 5px solid var(--primary); position: relative; }
+        .book-item { background: white; padding: 20px; border-radius: 10px; border-top: 5px solid var(--primary); border: 1px solid #eee; }
         .book-item.overdue { border-top-color: var(--danger); background: #fff8f8; }
-        
-        .book-title { font-weight: 600; font-size: 1.2rem; margin-bottom: 8px; color: var(--primary); }
-        .info-row { font-size: 0.95rem; margin-bottom: 5px; display: flex; justify-content: space-between; }
-        .label { color: #7f8c8d; }
-        .tel-link { color: var(--success); text-decoration: none; font-weight: 600; }
-        
-        .date-box { background: #f1f2f6; padding: 8px; border-radius: 6px; margin: 10px 0; font-size: 0.85rem; text-align: center; }
-        .fine-box { background: #fdf2f2; color: var(--danger); padding: 10px; border-radius: 6px; margin-bottom: 10px; font-weight: 600; text-align: center; border: 1px solid #fbdada; }
-
-        /* ปุ่มต่างๆ */
-        .btn-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .btn-return { background: #2c3e50; color: white; }
-        .btn-line { background: var(--line); color: white; text-decoration: none; text-align: center; padding: 10px; border-radius: 6px; font-size: 0.9rem; font-weight: 600; }
-        .btn-line:hover { opacity: 0.9; }
+        .fine-box { background: #fdf2f2; color: var(--danger); padding: 10px; border-radius: 6px; margin: 10px 0; text-align: center; font-weight: 600; border: 1px solid #fbdada; }
+        .btn-group { display: flex; flex-direction: column; gap: 8px; }
+        .btn-line { background: var(--line); color: white; text-decoration: none; text-align: center; padding: 10px; border-radius: 6px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>ระบบยืม-คืนหนังสือ</h1>
-    </header>
+    <header><h1>📚 ระบบยืม-คืนออนไลน์</h1></header>
 
     <div class="card">
         <div class="form-grid">
             <input type="text" id="bName" placeholder="ชื่อหนังสือ">
             <input type="text" id="uName" placeholder="ชื่อผู้ยืม">
-            <input type="text" id="uClass" placeholder="ระดับชั้น">
+            <input type="text" id="uClass" placeholder="ชั้น">
             <input type="number" id="uNo" placeholder="เลขที่">
-            <input type="tel" id="uPhone" placeholder="เบอร์โทรศัพท์">
+            <input type="tel" id="uPhone" placeholder="เบอร์โทร">
         </div>
-        <button class="btn-add" onclick="saveData()">บันทึกข้อมูลการยืม</button>
+        <button id="saveBtn" class="btn-add" onclick="saveData()">บันทึกข้อมูล (Sync Online)</button>
     </div>
 
-    <div class="tools-bar card" style="padding: 15px;">
-        <div class="search-container">
-            <span>🔍</span>
-            <input type="text" id="q" class="search-input" onkeyup="render()" placeholder="ค้นหาชื่อหนังสือ, ผู้ยืม หรือเบอร์โทร...">
-        </div>
-        <select id="statusFilter" class="filter-select" onchange="render()">
-            <option value="all">แสดงทั้งหมด</option>
-            <option value="normal">ปกติ ✅</option>
-            <option value="late">เกินกำหนด 🚨</option>
-        </select>
-    </div>
-
+    <div id="loader" class="loading" style="display:none;">⏳ กำลังเชื่อมต่อข้อมูล...</div>
     <div id="result" class="list-grid"></div>
 </div>
 
 <script>
-    function render() {
-        const list = JSON.parse(localStorage.getItem('lib-line-data') || '[]');
-        const query = document.getElementById('q').value.toLowerCase();
-        const filter = document.getElementById('statusFilter').value;
+    // ⚠️ วางลิงก์ Web App URL ของคุณที่นี่
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyyIgwOau6cKzuOFDyAPbrLolMKczOI0uzM-PGcRlGC3tsqUjMU-N80CZ0F7SgLImE/exec';
+
+    async function fetchItems() {
+        document.getElementById('loader').style.display = 'block';
+        try {
+            const res = await fetch(WEB_APP_URL);
+            const data = await res.json();
+            render(data);
+        } catch (e) { console.error(e); }
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    function render(list) {
         const container = document.getElementById('result');
         container.innerHTML = '';
+        list.forEach(item => {
+            const today = new Date().setHours(0,0,0,0);
+            const dueDate = new Date(item.due).setHours(0,0,0,0);
+            const diff = Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24));
+            const isLate = diff > 0;
 
-        const filtered = list.filter(item => {
-            const today = new Date();
-            const dueDate = new Date(item.due);
-            const diffTime = today.setHours(0,0,0,0) - dueDate.setHours(0,0,0,0);
-            const isLate = diffTime > 0;
-
-            const matchesSearch = item.book.toLowerCase().includes(query) || 
-                                  item.user.toLowerCase().includes(query) ||
-                                  (item.phone && item.phone.includes(query));
-            
-            let matchesFilter = true;
-            if (filter === 'normal') matchesFilter = !isLate;
-            if (filter === 'late') matchesFilter = isLate;
-
-            return matchesSearch && matchesFilter;
-        });
-
-        filtered.forEach(item => {
-            const today = new Date();
-            const dueDate = new Date(item.due);
-            const diffTime = today.setHours(0,0,0,0) - dueDate.setHours(0,0,0,0);
-            const lateDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            const isLate = lateDays > 0;
-
-            let fineHtml = "";
-            let lineBtnHtml = "";
-            let itemClass = "book-item";
-
+            let fineHtml = "", lineBtnHtml = "";
             if (isLate) {
-                fineHtml = `<div class="fine-box">🚨 เกินกำหนด ${lateDays} วัน<br>ค่าปรับ: ${lateDays} บาท</div>`;
-                itemClass += " overdue";
-                
-                // ข้อความสำหรับส่ง Line
-                const msg = encodeURIComponent(`สวัสดีครับคุณ ${item.user} ขออนุญาตตามคืนหนังสือ "${item.book}" เนื่องจากเกินกำหนดมา ${lateDays} วันแล้ว (ค่าปรับ ${lateDays} บาท) รบกวนนำมาคืนด้วยนะครับ ขอบคุณครับ`);
-                lineBtnHtml = `<a href="https://line.me/R/msg/text/?${msg}" class="btn-line" target="_blank">💬 ตามคืนผ่าน LINE</a>`;
+                fineHtml = `<div class="fine-box">🚨 เกินกำหนด ${diff} วัน (ปรับ ${diff} บาท)</div>`;
+                const msg = encodeURIComponent(`สวัสดีคุณ ${item.user} ตามคืนหนังสือ "${item.book}" เกินกำหนดมา ${diff} วันแล้วครับ`);
+                lineBtnHtml = `<a href="https://line.me/R/msg/text/?${msg}" class="btn-line">💬 ตามผ่าน LINE</a>`;
             }
 
             container.innerHTML += `
-                <div class="${itemClass}">
-                    <div class="book-title">📖 ${item.book}</div>
-                    <div class="info-row"><span class="label">ผู้ยืม:</span><span><b>${item.user}</b></span></div>
-                    <div class="info-row"><span class="label">ชั้น/เลขที่:</span><span>${item.class} / ${item.no}</span></div>
-                    <div class="info-row"><span class="label">เบอร์โทร:</span><span><a href="tel:${item.phone}" class="tel-link">${item.phone || '-'}</a></span></div>
-                    
-                    <div class="date-box">📅 กำหนดคืน: <b>${new Date(item.due).toLocaleDateString('th-TH')}</b></div>
-
+                <div class="book-item ${isLate ? 'overdue' : ''}">
+                    <div style="font-weight:600; font-size:1.1rem;">📖 ${item.book}</div>
+                    <div style="font-size:0.9rem; margin: 10px 0;">ผู้ยืม: <b>${item.user}</b> (${item.class}/${item.no})</div>
+                    <div style="font-size:0.8rem; color:#666;">เบอร์: ${item.phone}</div>
+                    <div style="font-size:0.8rem; background:#eee; padding:5px; border-radius:4px; margin:10px 0;">📅 คืน: ${new Date(item.due).toLocaleDateString('th-TH')}</div>
                     ${fineHtml}
-                    
                     <div class="btn-group">
                         ${lineBtnHtml}
-                        <button class="btn-return" onclick="removeData(${item.id})">คืนหนังสือเรียบร้อย</button>
+                        <button style="background:#2c3e50; color:white;" onclick="deleteData(${item.id})">คืนแล้ว (ลบ)</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         });
-
-        if (filtered.length === 0) container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #bdc3c7;">ไม่พบข้อมูล</p>';
     }
 
-    function saveData() {
+    async function saveData() {
         const book = document.getElementById('bName').value;
         const user = document.getElementById('uName').value;
-        const cls = document.getElementById('uClass').value;
-        const no = document.getElementById('uNo').value;
         const phone = document.getElementById('uPhone').value;
+        if(!book || !user || !phone) return alert("กรอกข้อมูลไม่ครบ!");
 
-        if(!book || !user || !cls || !no || !phone) return alert("กรุณากรอกข้อมูลให้ครบถ้วนนะครับ");
+        document.getElementById('saveBtn').disabled = true;
+        const due = new Date(); due.setDate(due.getDate() + 7);
 
-        const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 7);
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ id: Date.now(), book, user, class: document.getElementById('uClass').value, no: document.getElementById('uNo').value, phone, due: due.toISOString() })
+        });
 
-        const list = JSON.parse(localStorage.getItem('lib-line-data') || '[]');
-        list.push({ id: Date.now(), book, user, class: cls, no, phone, due: dueDate.toISOString() });
-        localStorage.setItem('lib-line-data', JSON.stringify(list));
-
-        ['bName', 'uName', 'uClass', 'uNo', 'uPhone'].forEach(id => document.getElementById(id).value = '');
-        render();
+        location.reload(); // โหลดใหม่เพื่อดึงข้อมูลล่าสุด
     }
 
-    function removeData(id) {
-        if(confirm("ยืนยันการคืนหนังสือ?")) {
-            const list = JSON.parse(localStorage.getItem('lib-line-data') || '[]');
-            localStorage.setItem('lib-line-data', JSON.stringify(list.filter(i => i.id !== id)));
-            render();
-        }
+    async function deleteData(id) {
+        if(!confirm("ยืนยันการคืน?")) return;
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'delete', id: id })
+        });
+        location.reload();
     }
-    window.onload = render;
+
+    window.onload = fetchItems;
 </script>
-
 </body>
 </html>
